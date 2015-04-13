@@ -120,7 +120,7 @@ public class View {
 		while(itr.hasNext()){
 			InterfaceMessage gmessage = itr.next();
 			String isRead;
-			SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+			SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 			String dates = sim.format(gmessage.getDate());
 			if(gmessage.isRead()){
 				isRead = "R";
@@ -137,7 +137,7 @@ public class View {
 			templemessage = model.getFolder(model.getActiveFolderName()).getMessage(messageId);
 			System.out.println("To:  "+ templemessage.getRecipient());
 			System.out.println("From :  " + templemessage.getFrom());
-			SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+			SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 			String dates = sim.format(templemessage.getDate());
 			System.out.println("Date: "+dates);
 			System.out.println("Subject:  "+ templemessage.getSubject());
@@ -195,7 +195,7 @@ public class View {
 		newmess.setBody(body);
 		Date day = new Date();
 		day.getTime();
-		SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+		SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		String dates = sim.format(day);
 		Date d = null;
 		try{
@@ -203,8 +203,6 @@ public class View {
 		}catch(ParseException e){
 		}
 		newmess.setDate(d);
-		int id = totalMessagenum();
-		newmess.setId(id);
 		newmess.markRead(false);
 		if(model.sendMessage(newmess)){
 			System.out.println("Success: sent");
@@ -212,14 +210,6 @@ public class View {
 		else{
 			System.out.println("Error: failed, could not sent");
 		}
-	}
-	private int totalMessagenum(){
-		int total = 0;
-		Iterator<String> itr = model.getFolderNames().iterator();
-		for(int i = 0; i < model.getFolderNames().size(); i++){
-			total += model.getFolder(itr.next()).getMessages().size();
-		}
-		return total;
 	}
 	private void delete(int messageId){
 		if(model.delete(messageId)){

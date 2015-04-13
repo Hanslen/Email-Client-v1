@@ -16,7 +16,7 @@ public class ClientModel implements InterfaceClientModel {
 	InterfaceConnector connector;
 	ArrayList<String> foldersname = new ArrayList<String>();
 	ArrayList<InterfaceFolder> folders = new ArrayList<InterfaceFolder>();
-	InterfaceMessage temple = new Message();
+	ArrayList<InterfaceMessage> allmessage = new ArrayList<InterfaceMessage>();
 	String currentfoldername = "inbox";
 	InterfaceFolder folderinbox;
 	InterfaceFolder foldersent;
@@ -50,25 +50,42 @@ public class ClientModel implements InterfaceClientModel {
 		try{
 			String[] messageId = connector.listMessages().split("\r\n");
 			for(int i = 0; i < messageId.length; i++){
-				String[] getnewMessage = connector.retrMessage(Integer.parseInt(messageId[i])).split("\r\n");
-				temple.setId(Integer.parseInt(messageId[i]));
-				String[] forRecipient = getnewMessage[0].split(": ");
-				temple.setRecipient(forRecipient[1]);
-				String[] forFrom = getnewMessage[1].split(": ");
-				temple.setFrom(forFrom[1]);
-				String[] fordate = getnewMessage[2].split(": ");
-				SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
-				String dates = fordate[1];
-				Date d = null;
-				try{
-					d=sim.parse(dates);
-				}catch(ParseException e){
+				int reduce = 0;
+				int have = 0;
+				Iterator<InterfaceMessage> itr = getFolder("sent").getMessages().iterator();
+				for(int j = 0; j < getFolder("sent").getMessages().size(); j++){
+					if(itr.next().getId() < (Integer.parseInt(messageId[i]))){
+						reduce++;
+					}
 				}
-				temple.setDate(d);
-				String[] forSubject = getnewMessage[3].split(": ");
-				temple.setSubject(forSubject[1]);
-				temple.setBody(getnewMessage[5]);
-				folders.get(0).addMessage(temple);
+				String[] getnewMessage = connector.retrMessage(Integer.parseInt(messageId[i])-reduce).split("\r\n");
+				for(int out = 0; out < allmessage.size(); out++){
+					if(allmessage.get(out).getId() == Integer.parseInt(messageId[i])){
+						have = 1;
+					}
+				}
+				if(have == 0){
+					InterfaceMessage temple = new Message();
+					temple.setId(Integer.parseInt(messageId[i]));
+					String[] forRecipient = getnewMessage[0].split(": ");
+					temple.setRecipient(forRecipient[1]);
+					String[] forFrom = getnewMessage[1].split(": ");
+					temple.setFrom(forFrom[1]);
+					String[] fordate = getnewMessage[2].split(": ");
+					SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+					String dates = fordate[1];
+					Date d = null;
+					try{
+						d=sim.parse(dates);
+					}catch(ParseException e){
+					}
+					temple.setDate(d);
+					String[] forSubject = getnewMessage[3].split(": ");
+					temple.setSubject(forSubject[1]);
+					temple.setBody(getnewMessage[5]);
+					folders.get(0).addMessage(temple);
+					allmessage.add(temple);
+				}
 			}
 			return true;
 		}catch(IOException e){
@@ -192,11 +209,13 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public boolean sendMessage(InterfaceMessage msg) {
 		String message;
-		SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+		SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		String dates = sim.format(msg.getDate());
 		message = "To: "+msg.getRecipient()+"\r\n"+"From: "+msg.getFrom()+"\r\n"+"Date: "+dates+"\r\n"+"Subject: "+msg.getSubject()+"\r\n\r\n"+msg.getBody();
-		connector.sendMessage(message);
+		String[] id = connector.sendMessage(message).split(" ");
+		msg.setId(Integer.parseInt(id[1]));
 		folders.get(1).addMessage(msg);
+		allmessage.add(msg);
 		return true;
 	}
 	@Override
