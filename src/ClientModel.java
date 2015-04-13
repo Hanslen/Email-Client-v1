@@ -110,6 +110,7 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public boolean delete(int messageId) {
 		// TODO Auto-generated method stub
+		connector.markMessageForDeleting(messageId);
 		return getFolder(getActiveFolderName()).delete(messageId);
 	}
 

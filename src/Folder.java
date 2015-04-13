@@ -102,6 +102,7 @@ public class Folder implements InterfaceFolder {
 			}
 		}
 		return messages.remove(getMessage(index));
+		
 	}
 
 }
