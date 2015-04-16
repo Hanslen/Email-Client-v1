@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import emailConnector.InterfaceConnector;
@@ -15,7 +16,8 @@ public class ClientModel implements InterfaceClientModel {
 
 	InterfaceConnector connector;
 	ArrayList<String> foldersname = new ArrayList<String>();
-	ArrayList<InterfaceFolder> folders = new ArrayList<InterfaceFolder>();
+	//ArrayList<InterfaceFolder> folders = new ArrayList<InterfaceFolder>();
+	Map<String, InterfaceFolder> foldersa = new HashMap<String, InterfaceFolder>();
 	ArrayList<InterfaceMessage> allmessage = new ArrayList<InterfaceMessage>();
 	String currentfoldername = "inbox";
 	InterfaceFolder folderinbox;
@@ -28,19 +30,29 @@ public class ClientModel implements InterfaceClientModel {
 		foldersname.add("sent");
 		folderinbox = new Folder();
 		foldersent = new Folder();
-		folders.add(folderinbox);
-		folders.add(foldersent);
+		//folders.add(folderinbox);
+		//folders.add(foldersent);
+		foldersa.put("inbox",folderinbox);
+		foldersa.put("sent", foldersent);
 	}
 
 	@Override
 	public boolean changeActiveFolder(String folderName) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < foldersname.size(); i++){
-			if(foldersname.get(i).equals(folderName)){
+		Iterator<Map.Entry<String, InterfaceFolder>> it = foldersa.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String, InterfaceFolder> entry = it.next();
+			if(entry.getKey().equals(folderName)){
 				this.currentfoldername = folderName;
 				return true;
 			}
 		}
+//		for(int i = 0; i < foldersname.size(); i++){
+//			if(foldersname.get(i).equals(folderName)){
+//				this.currentfoldername = folderName;
+//				return true;
+//			}
+//		}
 		return false;
 	}
 
@@ -83,7 +95,7 @@ public class ClientModel implements InterfaceClientModel {
 					String[] forSubject = getnewMessage[3].split(": ");
 					temple.setSubject(forSubject[1]);
 					temple.setBody(getnewMessage[5]);
-					folders.get(0).addMessage(temple);
+					foldersa.get("inbox").addMessage(temple);
 					allmessage.add(temple);
 				}
 			}
@@ -96,14 +108,22 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public boolean createFolder(String folderName) {
 		// TODO Auto-generated method stub
-		for(int i = 0; i < foldersname.size(); i ++){
-			if(foldersname.get(i).equals(folderName)){
+//		for(int i = 0; i < foldersname.size(); i ++){
+//			if(foldersname.get(i).equals(folderName)){
+//				return false;
+//			}
+//		}
+		Iterator<Map.Entry<String, InterfaceFolder>> it = foldersa.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String, InterfaceFolder> entry = it.next();
+			if(entry.getKey().equals(folderName)){
 				return false;
 			}
 		}
 		InterfaceFolder newfolder = new Folder();
 		foldersname.add(folderName);
-		folders.add(newfolder);
+//		folders.add(newfolder);
+		foldersa.put(folderName, newfolder);
 		return true;
 	}
 
@@ -123,20 +143,23 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public InterfaceFolder getFolder(String folderName) {
 		// TODO Auto-generated method stub
-		int index = 0;
-		for(int i = 0; i < foldersname.size(); i++){
-			if(foldersname.get(i).equals(folderName)){
-				index = i;
-				break;
-			}
+		//int index = 0;
+//		for(int i = 0; i < foldersname.size(); i++){
+//			if(foldersname.get(i).equals(folderName)){
+//				index = i;
+//				break;
+//			}
+//		}
+		try{
+			return foldersa.get(folderName);
+		}catch(Exception e){
+			return foldersa.get(this.currentfoldername);
 		}
-		return folders.get(index);
 	}
 
 	@Override
 	public Collection<String> getFolderNames() {
 		// TODO Auto-generated method stub
-		
 		return foldersname;
 	}
 
@@ -169,26 +192,31 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public boolean move(int messageId, String destination) {
 		// TODO Auto-generated method stub
-		int index = -1;
-		int current = 0;
-		for(int i = 0; i < foldersname.size(); i++){
-			if(foldersname.get(i).equals(destination)){
-				index = i;
-				break;
-			}
-		}
-		for(int i = 0; i < foldersname.size(); i++){
-			if(foldersname.get(i).equals(getActiveFolderName())){
-				current = i;
-				break;
-			}
-		}
-		if(index == -1){
+//		int index = -1;
+//		int current = 0;
+//		for(int i = 0; i < foldersname.size(); i++){
+//			if(foldersname.get(i).equals(destination)){
+//				index = i;
+//				break;
+//			}
+//		}
+//		for(int i = 0; i < foldersname.size(); i++){
+//			if(foldersname.get(i).equals(getActiveFolderName())){
+//				current = i;
+//				break;
+//			}
+//		}
+		
+//		if(index == -1){
+//			return false;
+//		}
+		try{
+			foldersa.get(destination).addMessage(foldersa.get(getActiveFolderName()).getMessage(messageId));
+			foldersa.get(getActiveFolderName()).delete(messageId);		
+			return true;
+		}catch(Exception e){
 			return false;
 		}
-		folders.get(index).addMessage(folders.get(current).getMessage(messageId));
-		folders.get(current).delete(messageId);		
-		return false;
 	}
 
 	@Override
@@ -201,6 +229,13 @@ public class ClientModel implements InterfaceClientModel {
 			if(foldersname.get(i).equals(oldName)){
 				foldersname.remove(oldName);
 				foldersname.add(i, newName);
+			}
+		}
+		Iterator<Map.Entry<String, InterfaceFolder>> it = foldersa.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String, InterfaceFolder> entry = it.next();
+			if(entry.getKey().equals(oldName)){
+				foldersa.put(newName, foldersa.get(oldName));
 				return true;
 			}
 		}
@@ -215,7 +250,7 @@ public class ClientModel implements InterfaceClientModel {
 		message = "To: "+msg.getRecipient()+"\r\n"+"From: "+msg.getFrom()+"\r\n"+"Date: "+dates+"\r\n"+"Subject: "+msg.getSubject()+"\r\n\r\n"+msg.getBody();
 		String[] id = connector.sendMessage(message).split(" ");
 		msg.setId(Integer.parseInt(id[1]));
-		folders.get(1).addMessage(msg);
+		foldersa.get("sent").addMessage(msg);
 		allmessage.add(msg);
 		return true;
 	}
@@ -230,4 +265,17 @@ public class ClientModel implements InterfaceClientModel {
 		// TODO Auto-generated method stub
 		getFolder(getActiveFolderName()).sortBySubject(ascending);
 	}
+
+	@Override
+	public Map<String, InterfaceFolder> getFolders() {
+		// TODO Auto-generated method stub
+		return foldersa;
+	}
+
+	@Override
+	public ArrayList<InterfaceMessage> getallmessage() {
+		// TODO Auto-generated method stub
+		return allmessage;
+	}
+	
 }

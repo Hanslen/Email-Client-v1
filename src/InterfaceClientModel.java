@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * A model object is responsible for storing the programs state.
@@ -115,4 +117,8 @@ public interface InterfaceClientModel {
 	 * @param ascending
 	 */
 	void sortBySubject(boolean ascending);
+	
+	Map<String, InterfaceFolder> getFolders();
+	
+	ArrayList<InterfaceMessage> getallmessage();
 }

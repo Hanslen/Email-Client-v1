@@ -7,8 +7,7 @@ import java.util.List;
 
 public class Folder implements InterfaceFolder {
 
-	ArrayList<InterfaceMessage> messages = new ArrayList<InterfaceMessage>();
-	
+	List<InterfaceMessage> messages = new ArrayList<InterfaceMessage>();
 	public Folder(){
 		// do not edit the arguments passed in to this constructor.
 	}
