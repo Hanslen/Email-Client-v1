@@ -28,83 +28,60 @@ public class View {
 		userCommand = getUserInput();
 		// and here?
 		while(!userCommand.equals("quit")){
-			switch(userCommand){
-			case "listfolders": System.out.print(command.listfolders());correctcommand = 1;break;
-			case "receive":System.out.println(command.receive());correctcommand = 1;break;
-			case "list":System.out.print(command.list());correctcommand = 1;break;
-			case "compose":createMessage();correctcommand = 1; break;
-			}
 			String[] scommand = userCommand.split(" ");
-			if(scommand[0].equals("view")){
-				if(scommand.length > 1){
-					System.out.println(command.show(Integer.parseInt(scommand[1])));
-					correctcommand = 1;
+			switch(userCommand){
+				case "listfolders": System.out.print(command.listfolders());correctcommand = 1;break;
+				case "receive":System.out.println(command.receive());correctcommand = 1;break;
+				case "list":System.out.print(command.list());correctcommand = 1;break;
+				case "compose":createMessage();correctcommand = 1; break;
+				case "sort -d":command.sortDate();System.out.println("Success: Messages sorted.");correctcommand = 1;break;
+				case "sort -s":command.sortSubject();System.out.println("Success: Messages sorted.");correctcommand = 1;break;
+			}
+			if(scommand.length == 2 && checkIsInteger(scommand[1])){
+				switch(scommand[0]){
+					case "view" :System.out.println(command.show(Integer.parseInt(scommand[1])));correctcommand = 1;break;
+					case "reply":reply(Integer.parseInt(scommand[1]));correctcommand = 1;break;
+					case "delete":System.out.println(command.delete(Integer.parseInt(scommand[1])));correctcommand = 1;break;
 				}
 			}
-			else if(scommand[0].equals("sort")){
-				if(scommand.length > 1){
-					if(scommand[1].equals("-d")){
-						command.sortDate();
-					}
-					else{
-						command.sortSubject();
-					}
-					System.out.println("Success: Messages sorted.");
-					correctcommand = 1;
-				}
+			if(scommand[0].equals("mkf")&&scommand.length == 2){
+				String name = scommand[1];
+				System.out.println(command.makefolder(name));
+				correctcommand = 1;
 			}
-			else if(scommand[0].equals("mkf")){
-				if(scommand.length > 1){
-					String name = scommand[1];
-					System.out.println(command.makefolder(name));
-					correctcommand = 1;
-				}
-			}
-			else if(scommand[0].equals("move")){
-				if(scommand.length > 1){
+			else if(scommand[0].equals("move")&&scommand.length == 3){
+				if(checkIsInteger(scommand[1])){
 					int messageId = Integer.parseInt(scommand[1]);
 					String foldername = scommand[2];
 					System.out.println(command.move(messageId,foldername));
 					correctcommand = 1;
 				}
 			}
-			else if(scommand[0].equals("cf")){
-				if(scommand.length > 1){
-					System.out.println(command.changefolder(scommand[1]));
-					correctcommand = 1;
-				}
+			else if(scommand[0].equals("cf")&&scommand.length == 2){
+				System.out.println(command.changefolder(scommand[1]));
+				correctcommand = 1;
 			}
 			else if(scommand[0].equals("delete")){
-				if(scommand.length > 1){
-					if(scommand[1].equals("-r")){
-						if(scommand.length == 3){
-							System.out.println(command.deleteFolder(scommand[2]));
-							correctcommand = 1;
-						}
-					}
-					else{
-						System.out.println(command.delete(Integer.parseInt(scommand[1])));
+				if(scommand[1].equals("-r")&&scommand.length == 3){
+					if(scommand.length == 3){
+						System.out.println(command.deleteFolder(scommand[2]));
 						correctcommand = 1;
 					}
 				}
 			}
-			else if(scommand[0].equals("mark")){
-					if(scommand.length == 3){
-						if(scommand[1].equals("-r")){
-							System.out.println(command.markMessage(Integer.parseInt(scommand[2]), true));
-							correctcommand = 1;
-						}
-						else if(scommand[1].equals("-u")){
-							System.out.println(command.markMessage(Integer.parseInt(scommand[2]),false));
-							correctcommand = 1;
-						}
-					}
-			}
-			else if(scommand[0].equals("reply")){
-				if(scommand.length == 2){
-					reply(Integer.parseInt(scommand[1]));
+			else if(scommand[0].equals("mark")&&scommand.length == 3){					
+				if(scommand[1].equals("-r")){
+					System.out.println(command.markMessage(Integer.parseInt(scommand[2]), true));
 					correctcommand = 1;
 				}
+				else if(scommand[1].equals("-u")){
+					System.out.println(command.markMessage(Integer.parseInt(scommand[2]),false));
+					correctcommand = 1;
+				}
+			}
+			else if(scommand[0].equals("rename")&&scommand.length == 3){
+				System.out.println(command.rename(scommand[1],scommand[2]));
+				correctcommand = 1;
 			}
 			if(correctcommand == 0){
 				System.out.println("Error: Not a valid command.");
@@ -125,8 +102,18 @@ public class View {
 	private void createMessage(){
 		System.out.print("To: ");
 		String to = input.nextLine();
+		while(to.equals("")){
+			System.out.println("Error: please type who you want to sent!");
+			System.out.print("To: ");
+			to = input.nextLine();
+		}
 		System.out.print("From: ");
 		String from = input.nextLine();
+		while(from.equals("")){
+			System.out.println("Error: please type you email address!");
+			System.out.print("From: ");
+			from = input.nextLine();
+		}
 		System.out.print("Subject: ");
 		String subject = input.nextLine();
 		System.out.print("Body: ");
@@ -138,7 +125,7 @@ public class View {
 		newmess.setBody(body);
 		Date day = new Date();
 		day.getTime();
-		SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		SimpleDateFormat sim=new SimpleDateFormat("dd-M-yyyy HH:mm:ss");
 		String dates = sim.format(day);
 		Date d = null;
 		try{
@@ -174,7 +161,7 @@ public class View {
 				newmess.setBody(body);
 				Date day = new Date();
 				day.getTime();
-				SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+				SimpleDateFormat sim=new SimpleDateFormat("dd-M-yyyy HH:mm:ss");
 				String dates = sim.format(day);
 				Date d = null;
 				try{
@@ -196,6 +183,16 @@ public class View {
 		if(has == 0){
 			System.out.println("Error: Message does not exist");
 		}
+	}
+	private boolean checkIsInteger(String messageId){
+		char integerArray[];
+		integerArray = messageId.toCharArray();
+		for(int counter = 0; counter < integerArray.length;counter++){
+			if(!Character.isDigit(integerArray[counter])){
+				return false;
+			}
+		}
+		return true;
 	}
 	
 }

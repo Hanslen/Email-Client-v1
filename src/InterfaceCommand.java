@@ -32,7 +32,7 @@ public class InterfaceCommand {
 		while(itr.hasNext()){
 			InterfaceMessage gmessage = itr.next();
 			String isRead;
-			SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+			SimpleDateFormat sim=new SimpleDateFormat("dd-M-yyyy HH:mm:ss");
 			String dates = sim.format(gmessage.getDate());
 			if(gmessage.isRead()){
 				isRead = "R";
@@ -96,7 +96,7 @@ public class InterfaceCommand {
 		return "Error: failed, could not delete";
 	}
 	public String toString(InterfaceMessage msg){
-		SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		SimpleDateFormat sim=new SimpleDateFormat("dd-M-yyyy HH:mm:ss");
 		String dates = sim.format(msg.getDate());
 		return "To: "+msg.getRecipient()+"\r\n"+"From: "+msg.getFrom()+"\r\n"+"Date: "+dates+"\r\n"+"Subject: "+msg.getSubject()+"\r\n\r\n"+msg.getBody();
 	}
@@ -131,5 +131,12 @@ public class InterfaceCommand {
 			}
 		}
 		return "Error: Message does not exist";
+	}
+	
+	public String rename(String oldname, String newname){
+		if(model.renameFolder(oldname, newname)){
+			return "Success: you have rename "+oldname+" to "+newname;
+		}
+		return "Error: This folder does not exist";
 	}
 }

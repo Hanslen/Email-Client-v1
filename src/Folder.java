@@ -32,6 +32,7 @@ public class Folder implements InterfaceFolder {
 		for(int i = 0; i < messages.size();i++){
 			if(messages.get(i).getId() == messageId){
 				index = i;
+				break;
 			}
 		}
 		return messages.get(index);
@@ -94,14 +95,13 @@ public class Folder implements InterfaceFolder {
 	@Override
 	public boolean delete(int messageId) {
 		// TODO Auto-generated method stub
-		int index = 0;
 		for(int i = 0; i < messages.size();i++){
 			if(messages.get(i).getId() == messageId){
-				index = i;
+				messages.remove(messages.get(i));
+				return true;
 			}
 		}
-		return messages.remove(getMessage(index));
-		
+		return false;
 	}
 
 }

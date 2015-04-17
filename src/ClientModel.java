@@ -30,8 +30,6 @@ public class ClientModel implements InterfaceClientModel {
 		foldersname.add("sent");
 		folderinbox = new Folder();
 		foldersent = new Folder();
-		//folders.add(folderinbox);
-		//folders.add(foldersent);
 		foldersa.put("inbox",folderinbox);
 		foldersa.put("sent", foldersent);
 	}
@@ -47,12 +45,6 @@ public class ClientModel implements InterfaceClientModel {
 				return true;
 			}
 		}
-//		for(int i = 0; i < foldersname.size(); i++){
-//			if(foldersname.get(i).equals(folderName)){
-//				this.currentfoldername = folderName;
-//				return true;
-//			}
-//		}
 		return false;
 	}
 
@@ -84,7 +76,7 @@ public class ClientModel implements InterfaceClientModel {
 					String[] forFrom = getnewMessage[1].split(": ");
 					temple.setFrom(forFrom[1]);
 					String[] fordate = getnewMessage[2].split(": ");
-					SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+					SimpleDateFormat sim=new SimpleDateFormat("dd-M-yyyy HH:mm:ss");
 					String dates = fordate[1];
 					Date d = null;
 					try{
@@ -108,11 +100,6 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public boolean createFolder(String folderName) {
 		// TODO Auto-generated method stub
-//		for(int i = 0; i < foldersname.size(); i ++){
-//			if(foldersname.get(i).equals(folderName)){
-//				return false;
-//			}
-//		}
 		Iterator<Map.Entry<String, InterfaceFolder>> it = foldersa.entrySet().iterator();
 		while(it.hasNext()){
 			Map.Entry<String, InterfaceFolder> entry = it.next();
@@ -122,7 +109,6 @@ public class ClientModel implements InterfaceClientModel {
 		}
 		InterfaceFolder newfolder = new Folder();
 		foldersname.add(folderName);
-//		folders.add(newfolder);
 		foldersa.put(folderName, newfolder);
 		return true;
 	}
@@ -143,13 +129,6 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public InterfaceFolder getFolder(String folderName) {
 		// TODO Auto-generated method stub
-		//int index = 0;
-//		for(int i = 0; i < foldersname.size(); i++){
-//			if(foldersname.get(i).equals(folderName)){
-//				index = i;
-//				break;
-//			}
-//		}
 		try{
 			return foldersa.get(folderName);
 		}catch(Exception e){
@@ -178,45 +157,41 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public boolean mark(int messageId, boolean read) {
 		// TODO Auto-generated method stub
-		int index = 0;
 		Iterator<InterfaceMessage> itr = getFolder(getActiveFolderName()).getMessages().iterator();
 		for(int i = 0; i < getFolder(getActiveFolderName()).getMessages().size();i++){
 			if(itr.next().getId() == messageId){
-				index = i;
+				getFolder(getActiveFolderName()).getMessage(i).markRead(read);
+				return true;
 			}
 		}
-		getFolder(getActiveFolderName()).getMessage(index).markRead(read);
 		return false;
 	}
 
 	@Override
 	public boolean move(int messageId, String destination) {
 		// TODO Auto-generated method stub
-//		int index = -1;
-//		int current = 0;
-//		for(int i = 0; i < foldersname.size(); i++){
-//			if(foldersname.get(i).equals(destination)){
-//				index = i;
-//				break;
-//			}
-//		}
-//		for(int i = 0; i < foldersname.size(); i++){
-//			if(foldersname.get(i).equals(getActiveFolderName())){
-//				current = i;
-//				break;
-//			}
-//		}
-		
-//		if(index == -1){
+//		try{
+//			foldersa.get(destination).addMessage(foldersa.get(getActiveFolderName()).getMessage(messageId));
+//			foldersa.get(getActiveFolderName()).delete(messageId);		
+//			return true;
+//		}catch(Exception e){
 //			return false;
 //		}
-		try{
-			foldersa.get(destination).addMessage(foldersa.get(getActiveFolderName()).getMessage(messageId));
-			foldersa.get(getActiveFolderName()).delete(messageId);		
-			return true;
-		}catch(Exception e){
-			return false;
+		Iterator<Map.Entry<String, InterfaceFolder>> it = foldersa.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String, InterfaceFolder> entry = it.next();
+			if(entry.getKey().equals(destination)){
+				Iterator<InterfaceMessage> itr = getFolder(getActiveFolderName()).getMessages().iterator();
+				for(int i = 0; i < getFolder(getActiveFolderName()).getMessages().size();i++){
+					if(itr.next().getId() == messageId){
+						foldersa.get(destination).addMessage(foldersa.get(getActiveFolderName()).getMessage(messageId));
+						foldersa.get(getActiveFolderName()).delete(messageId);	
+						return true;
+					}
+				}
+			}
 		}
+		return false;
 	}
 
 	@Override
@@ -245,7 +220,7 @@ public class ClientModel implements InterfaceClientModel {
 	@Override
 	public boolean sendMessage(InterfaceMessage msg) {
 		String message;
-		SimpleDateFormat sim=new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		SimpleDateFormat sim=new SimpleDateFormat("dd-M-yyyy HH:mm:ss");
 		String dates = sim.format(msg.getDate());
 		message = "To: "+msg.getRecipient()+"\r\n"+"From: "+msg.getFrom()+"\r\n"+"Date: "+dates+"\r\n"+"Subject: "+msg.getSubject()+"\r\n\r\n"+msg.getBody();
 		String[] id = connector.sendMessage(message).split(" ");
